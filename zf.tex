@@ -1,0 +1,417 @@
+\documentclass[a4paper, 11pt, landscape]{article}
+
+\usepackage{mathptmx} % more compact font
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{paralist} % for compacter lists
+\usepackage{hyperref} % for Todo's and similar things
+\usepackage[left=4.5mm, right=4.5mm, top=4.5mm, bottom=6mm, landscape, nohead, nofoot]{geometry}
+\usepackage[small,compact]{titlesec}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{xparse}
+
+% compact text
+\linespread{0.9}
+\setlength{\parindent}{0pt}
+
+% compact lists even more
+\setdefaultleftmargin{0em}{0em}{0em}{0em}{0em}{0em}
+
+% define expectation symbol
+\DeclareMathOperator*{\E}{\mathbb{E}}
+
+% compact sections
+\titlespacing*{\section}{0pt}{0em}{0em}
+\titlespacing*{\subsection}{0pt}{0em}{0em}
+\titlespacing*{\subsubsection}{0pt}{0em}{0em}
+
+% coloured section headings for easier read
+\titleformat{name=\section}[block]
+{\sffamily}
+{}
+{0pt}
+{\colorsection}
+\newcommand{\colorsection}[1]{%
+	\colorbox{red!10}{\parbox[t][0em]{\dimexpr\columnwidth-2\fboxsep}{\thesection\ #1}}}
+
+
+\titleformat{name=\subsection}[block]
+{\sffamily}
+{}
+{0pt}
+{\subcolorsection}
+\newcommand{\subcolorsection}[1]{%
+	\colorbox{orange!10}{\parbox[t][0em]{\dimexpr\columnwidth-2\fboxsep}{\thesubsection\ #1}}}
+
+
+\titleformat{name=\subsubsection}[block]
+{\sffamily}
+{}
+{0pt}
+{\subsubcolorsection}
+\newcommand{\subsubcolorsection}[1]{%
+	\colorbox{blue!10}{\parbox[t][0em]{\dimexpr\columnwidth-2\fboxsep}{\thesubsubsection\ #1}}}
+
+% environment for multicols inside a list
+\NewDocumentEnvironment{listcols}{O{2} O{0pt}}
+{%
+	\bgroup %
+	\setlength{\multicolsep}{#2} %
+	\begin{multicols*}{#1} %
+	}
+	{%
+	\end{multicols*} %
+	\egroup %
+}
+
+% multicols lines & spacing
+\setlength{\columnsep}{0.2cm}
+\setlength{\columnseprule}{0.2pt}
+
+% No page numbers
+\pagenumbering{gobble}
+
+% math helpers
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+	\begin{multicols*}{3}
+		
+		\section{Essentials}
+		\subsection{Adaptive Stepsize}
+		\begin{compactdesc}
+			\item[Line search:] Optimize step size at every step along gradient
+			\item[Bold driver:] Objective decrease $\rightarrow$ increase step size, objective increase  $\rightarrow$ decrease step size
+		\end{compactdesc}
+		\subsection{Loss functions}
+		\begin{compactdesc}
+			\item[L1 loss:] $l_1(\mathbf{w}; x_i, y_i) = |y_i - \mathbf{w}^T x_i| $ 
+			\item[Lp loss:] $l_p(\mathbf{w}; x_i, y_i) = |y_i - \mathbf{w}^T x_i|^p$
+			\item[0/1 loss:] $l_{0/1}(\mathbf{w}; x_i, y_i) =  \left\{
+			\begin{array}{lr}
+			0, \text{ if } sign(\mathbf{w}^Tx_i) = y_i\\
+			1, \text{ else}\\
+			\end{array}\right\}$
+			\item[Perceptron loss:] $l_\text{perc}(\mathbf{w}; x_i, y_i) = \left\{
+			\begin{array}{lr}
+			0, \text{ if } sign(\mathbf{w}^Tx_i) = y_i\\
+			-y_i\mathbf{w}^Tx_i, \text{ else}\\
+			\end{array}\right\}\\ = max(0, -y_i \mathbf{w}^T x_i)$
+			\item[Cost sensitive perceptron:] $l_\text{cs}(\mathbf{w}; x_i, y_i) = c_y * l_p(\mathbf{w}; x_i, y_i)$
+			\item[Hinge loss:] $l_H(\mathbf{w}^T; x_i, y_i) = max(0, 1- y_i \mathbf{w}^Tx_i)$
+			\item[Logistic loss:] $l_\text{logistic}(\mathbf{w}^T, x_i, y_i) = log(1 + exp(-y_i\mathbf{w}^Tx_i))$
+		\end{compactdesc}
+		\subsection{Loss Function Derivatives}
+		\begin{compactdesc}
+			\item[Perceptron loss:] $\nabla_\mathbf{w} l_p = \left\{
+			\begin{array}{lr}
+			0, \text{ if } -y_i \mathbf{w}^T x_i < 0\\
+			-y_ix_i, \text{ else}\\
+			\end{array}\right\}\\$
+		\end{compactdesc}
+		\subsection{Distributions}
+		\begin{compactdesc}
+			\item[1D-Gaussian:] $P(X = x) = 1/\sqrt{2\pi\sigma^2}exp(-(x-\mu)^2/{2\sigma^2})$
+			\item[Bernoulli:] $Ber(y; x) = \left\{
+				\begin{array}{lr}
+				x, \text{ if } y= +1\\
+				1-x, \text{ if } y =-1\\
+				\end{array}
+				\right\}$
+		\end{compactdesc}
+		\subsection{Matrix Calculus}
+		\begin{compactdesc}
+			\item[Derivatives]
+			$\frac{\partial}{\partial x} \mathbf{A x} = \mathbf{A}^T$\\
+			$\frac{\partial}{\partial x} \mathbf{x}^T\mathbf{A} =  \mathbf{A}$\\
+			$\frac{\partial}{\partial x} \mathbf{x}^T\mathbf{x} = 2\mathbf{x}$\\
+			$\frac{\partial}{\partial x} \mathbf{x}^T\mathbf{A x} = \mathbf{Ax} + \mathbf{A}^T\mathbf{x}$
+			\item[Ranks]
+			$rank(AB) \leq \min(rank(A), rank(B))$
+			\item[Diverse] $X$ psd $\Rightarrow u^TX u \geq 0$\\
+			$X$ pd $\Rightarrow u^TX u > 0$\\
+			$X$ psd and $Y$ pd $\Rightarrow X+Y$ pd\\
+			$X$ pd $\Rightarrow$ invertible
+
+		\end{compactdesc}
+		\subsection{Probabilistics}
+		\begin{compactdesc}
+			\item[Multiplication:] $P(A|B) = \frac{P(A, B)}{P(B)}$
+			\item[Bayes:] $P(A|B) = \frac{P(B|A) P(A)}{P(B)}$
+		\end{compactdesc}
+		
+		
+		
+		\subsection{Gradient Descent}
+		\begin{compactdesc}
+			\item[Normal:] $\mathbf{w}_{t+1} = \mathbf{w}_t - \eta_t \nabla_\mathbf{w}\hat{R}(\mathbf{w}_t)$
+			\item[Stochastic:] $\mathbf{w}_{t+1} = \mathbf{w}_t - \eta_t \nabla_wl(\mathbf{w}_t, x', y')$ for random $(x', y') \in D$
+			\item[SGD L2:] $\mathbf{w}_{t+1} = \mathbf{w}_t(1-2\lambda\eta_t) - \eta_t \nabla_wl(\mathbf{w}_t, x', y')$
+		\end{compactdesc}
+		
+		\subsection{Fundamental assumptions}
+		Optimal solution lies in span of data
+		\begin{compactdesc}
+			\item[Alternative Representation:] $\mathbf{w^*} = \sum_{i=1}^{n}(\alpha_iy_i)x_i$ for some $\alpha_{1:n}$
+		\end{compactdesc}
+
+		
+		\section{Regression}
+		\subsection{Linear least sqares}
+		\begin{compactdesc}
+			\item[Objective Function:] $\hat{R}(\mathbf{w}) = \sum_{i=1}^{n}l_2(\mathbf{w}; x_i, y_i)$
+			\item[Closed Form:] $\mathbf{w^*} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^Ty$ with $\mathbf{X} = (x_1, x_2, ..., x_n)^T$
+			\item[Gradient:] $\nabla_\mathbf{w} \hat{R}(\mathbf{w}) = -2 \sum_{i=1}^{n}(y_i - \mathbf{w}^Tx_i)x_i$
+			\item[Runtime:] Closed form $\varTheta(n*d^2 + d^3)$, Gradient descent $\varTheta(iter * n * d)$
+		\end{compactdesc}
+		
+		\subsection{Polynomial features}
+		\begin{compactdesc}
+			\item[Aim:]Fit non-linear functions via linear regression.
+			\item[Solution:]Use non-linear transformation of data
+			\item[Ojbective Function:] $\hat{R}(\mathbf{w}) = \sum_{i=1}^{n}(y_i - f(x))^2$
+			\item[Transformation:]$f(x) = \sum_{j=1}^{d}w_i\phi_i(x)$
+			\item[Polynomial features:]$x \rightarrow \phi(x)$
+			
+		\end{compactdesc}
+		\subsection{Ridge Regression}
+		\begin{compactdesc}
+			\item[Objective Function:] $\hat{R}(\mathbf{w}) = \sum_{i=1}^{n}l_2(\mathbf{w}, x_i, y_i) + \lambda\|\mathbf{w}\|_2^2$
+			\item[Closed Form:] $\mathbf{w^*} = (\mathbf{X}^T\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^Ty$
+			\item[Gradient:] $\nabla_\mathbf{w} \hat{R}(\mathbf{w}) = -2 \sum_{i=1}^{n}(y_i - \mathbf{w}^Tx_i)x_i + 2\lambda\mathbf{w}$
+			\item[Notes:] Scale of features matter. All features should be zero mean and unit variance\\ Use L1 regularizer to get LASSO for better feature selection
+		\end{compactdesc}
+	
+		\section{Classification}
+		\subsection{Nearest Neighbor}
+		\begin{compactdesc}
+			\item[Idea:] Use k closest neighbors to vote on new point x's class
+			\item[Prediction:] $\hat{y} = sign(\sum_{i:x_i \in KNN(x)}^{}y_i)$ (binary case)
+		\end{compactdesc}
+		\subsection{Perceptron algorithm}
+		Stochastic gradient descent on perceptron loss
+		\subsection{SVM}
+		\begin{compactdesc}
+			\item[Objective Function:]  $\hat{R}(\mathbf{w}) = \sum_{i=1}^{n}l_H(\mathbf{w}, x_i, y_i) + \lambda\|\mathbf{w}\|_2^2$
+			\item[Gradient:]???
+			\item[Notes:] Use L1 regularizer for better feature selection (L1 SVM)
+		\end{compactdesc}
+		\subsection{Multiclass classification}
+		\begin{compactdesc}
+			\item[1vAll:] Train 1 classifier for each class. Choose classifier with biggest confidence. 
+			\item[1vAll prediction:] $\hat{y} = \argmax_{i=1:c}f_i(x)$ where $f_i(x)$ is the classifier for class $i$
+			\item[1vAll Notes:] Normalize weights $\hat{\mathbf{w_i}}=\mathbf{w_i^*}/\|\mathbf{w_i^*}\|$ for determining confidence.
+			\item[1v1:] Train 1 classifier for each class pair. ($c(c-1)/2$)
+			\item[1v1 prediction:] Use voting to determine class
+		\end{compactdesc}
+
+		\section{Kernels}
+		\subsection{Notation}
+		\begin{compactdesc}
+			\item[Kernel Function:] $k(x_i, x_j) = \phi(x_i)^T\phi(x_j)$
+			\item[Gram Matrix:] $\mathbf{K} = \left(
+				\begin{array}{ccc}
+				k(x_1, x_1), ..., k(x_1, x_n)\\
+				..., ..., ...\\
+				k(x_n, x_1), ..., k(x_n, x_n)
+				\end{array}\right)$
+			\item[Kernelitem:] $k_i = [y_1k(x_i, x_1), y_2k(x_i, x_2), ..., y_nk(x_i, x_n)]$
+		\end{compactdesc}
+		\subsection{General}
+		\begin{compactdesc}
+			\item[Properties:] inner product, symmetric, positive semidefinite
+			\item[K. engineering:] $k_1 + k_2$, $k_1 * k_2$, $c * k_1 \text{ for } c > 0$, $f(k_1)$ for $f(x)$ polynomial or exp
+			\item[Monomials of deg. m] $k(x, x') = (x^Tx')^m$
+			\item[Monomials up to deg. m] $k(x, x') = (1 + x^Tx)^m$
+		\end{compactdesc}
+		\subsection{Kernelized Linear Ridge Regression}
+		\begin{compactdesc}
+			\item[Objective Function:] $\hat{R}(\mathbf{\alpha}) = \|\mathbf{\alpha}^T\mathbf{K} - y\|_2^2 + \lambda \mathbf{\alpha}^T\mathbf{K}\mathbf{\alpha}$
+			\item[Closed Form:] $\mathbf{\alpha^*} = (\mathbf{K} + \lambda\mathbf{I})^{-1}y$
+			\item[Prediction:] $\hat{y} = \sum_{i=1}^{d}\alpha^*_ik(x_i, x)$
+		\end{compactdesc}
+		\subsection{Kernelized Perceptron}
+		\begin{compactdesc}
+			\item[Objective Function:] $\hat{R}(\mathbf{\alpha}) = \sum_{i=1}^{n}\max(0, - y_i \mathbf{\alpha}^Tk_i)$\\
+			$\hat{R}(\mathbf{\alpha}) = \sum_{i=1}^{n}\max(0, - y_i\sum_{j}\alpha_jy_jk(x_j, x_i))$\\
+			\item[Prediction:] $\hat{y} = sign(\sum_{i=1}^{d}\alpha^*_iy_ik(x_i, x))$
+			\item[Optimize:] $\text{if } \hat{y} \neq y_i \text{ set } \alpha_i = \alpha_i + \eta_t$
+		\end{compactdesc}
+		\subsection{Kernelized SVM}
+		\begin{compactdesc}
+			\item[Objective Function:] $\hat{R}(\mathbf{\alpha}) = \sum_{i=1}^{n}\max(0, 1- y_i \mathbf{\alpha}^Tk_i) + \lambda\mathbf{\alpha}^T\mathbf{K}\mathbf{\alpha}$
+			\item[Prediction:] $\hat{y} = sign(\sum_{i=1}^{d}\alpha^*_iy_ik(x_i, x))$
+			\item[Optimize:] $\text{if } \hat{y} \neq y_i \text{ set } \alpha_i = \alpha_i + \eta_t$
+		\end{compactdesc}
+		
+		
+		\section{Artificial Neural Networks}
+		\begin{compactdesc}
+			\item[Transfer Function:] $\sum_{j}^{}w_j\varphi(\theta_j^Tx)$, $w_j \hat{=}$ hidden-to-output weight, $\theta_j^T \hat{=}$ input-to-hidden weight
+			\item[ReLU Act. Func::] $\varphi(z) = \max(z,0)$
+		\end{compactdesc}
+		\subsection{Propagation Algorithms}
+		??
+		\section{Practical Issues}
+		\subsection{Feature Selection}
+		\begin{compactdesc}
+			\item[Greedy Forward:] Start with no features. Always choose best feature to add next, until no improvement.
+			\item[Greedy Backward:] Start with all features. Always choose best feature to remove next, until no improvement.
+		\end{compactdesc}
+		\subsection{Imbalanced Data}
+		\begin{compactdesc}
+			\item[Subsampling] Remove samples from majority class until balanced
+			\item[Upsampling] Repeat samples from minority class until balanced
+			\item[Cost sensitive loss functions:] See cost sensitive perceptron loss
+		\end{compactdesc}
+		\subsection{Performance Metrics}
+		\begin{compactdesc}
+			\item[Accuracy:] $\frac{TP + TN}{TP + TN + FP + FN}$
+			\item[Precision:] $\frac{TP}{TP + FP}$
+			\item[Recall:] $\frac{TP}{TP + FN}$
+			\item[F1-Score:] $\frac{2TP}{2TP + FP + FN}$
+			\item[What we want:] Good F1-Score
+		\end{compactdesc}
+		
+		\section{Clustering}
+		\subsection{k-means}
+		\begin{compactdesc}
+			\item[1:] Initialize cluster centers at random
+			\item[2:] Assign each point to closest center\\ $z_i \leftarrow \argmin_{j \in 1:k} \|x_i-\mu_j^{t-1}\|_2^2$
+			\item[3:] Update centers as mean of assigned points\\ $\mu_j^t \leftarrow 1/n_j \sum_{i:z_i=j}^{} x_i$
+			\item[Runtime] $\varTheta(iter * n * k * d)$
+		\end{compactdesc}
+		\subsection{k-means++ (Initialization)}
+		\begin{compactdesc}
+			\item[1:] Start with random datapoint as center
+			\item[2:] Pick $\mu_j = x_i$ randomly s.t.\\ $P(\mu_j = x_i) = 1/Z \min_{l \in 1:j-1}\|x_i - \mu_l\|_2^2$		
+		\end{compactdesc}
+		
+		\section{Probabilistic Modelling}
+		\subsection{Bayes Optimal Predictor}
+		\begin{compactdesc}
+			\item[Assumption:] $(x_i, y_i) \sim P(X, Y)$ i.i.d
+			\item[Minimize:] $\int P(x, y) l(y;h(x))dx dy = \E_{x,y}[l(y;h(x))]$ by finding best $h(x)$
+			\item[LS Solution:] $h^*(x) = \E[Y | X=x] = \int P(Y|X=x)y dy$
+			\item[Application:] Estimate $P(Y | X=x)$ to predict label
+		\end{compactdesc}
+		\subsection{Maximum Likelihood}
+		\begin{compactdesc}
+			\item[Idea:] Estimate parameters of model such that the likelihood of the labels is maximized
+			\item[1:] $\theta^* = \argmax_\theta \hat{P}(y_1, ..., y_n | x_1, ..., x_n, \theta)$\\
+			$\Rightarrow\theta^* = \argmin_\theta - \sum_{i}^{} \log \hat{P}(y_i |x_i, \theta)$
+			\item[2:] Set derivative to zero, get $\theta^*$
+		\end{compactdesc}
+		\subsection{Maximum a Posteriori}
+		\begin{compactdesc}
+			\item[Idea:] Introduce assumption on distribution of parameters
+			\item[1:] $\argmax_w P(w|x_{1:n}, y_{1:n}) = \argmax_w \frac{P(w|x_{1:n})P(y_{1:n}|x_{1:n}, w)}{P(y_{1:n}|x_{1:n})}$\\
+			$\Rightarrow \argmin_w -\log P(w|x_{1:n}) - \log P(Y_{1:n}|x_{1:n}, w) + \log P(y_{1:n}|x_{1:n})$\\
+			$\Rightarrow \argmin_w -\log P(w) - \log P(Y_{1:n}|x_{1:n}, w) + \log P(y_{1:n}|x_{1:n})$ (indep.)\\
+			$\Rightarrow \argmin_w -\log P(w) - MLE + \log P(y_{1:n}|x_{1:n})$\\
+			$\Rightarrow \argmin_w -\log P(w) - MLE$ (irrelevant, indep. of w)\\
+			$\Rightarrow \argmin_w -\log \prod P(w_j) - MLE$ (iid)
+			\item[2:] Set derivative to zero
+			
+		\end{compactdesc}
+		\subsection{Logistic Regression}
+		\begin{compactdesc}
+			\item[Link Function:] $\sigma(\mathbf{w}'Tx) = \frac{1}{1 + exp(-\mathbf{w}^Tx)}$
+			\item[Noise:] Assume Bernoulli noise
+			\item[Distribution:] $P(y|x,\mathbf{w}) = Ber(y; \sigma(\mathbf{w}^Tx)$\\
+			$\Rightarrow  P(y|x,\mathbf{w}) = \frac{1}{1 + exp(-y\mathbf{w}^Tx)}$
+			\item[Idea.] Estimate above distribution using MLE
+			\item[Gradient:] $y\mathbf{x}\hat{P}(Y=-y|\mathbf{w}, x)$
+		\end{compactdesc}
+		\subsection{Bayesian Decision Theory}
+		\begin{compactdesc}
+			\item[Idea:] Assign cost to actions and minimize cost
+			\item[Given:] $P(y|x)$, Actions $A$, Cost function $y \times A \rightarrow \mathbb{R}$
+			\item[Minimize:] $a^* = \argmin_{a \in A} \E_y[C(y,a)|x]$\\
+			$\Rightarrow a^* = \argmin_{a \in A} \sum_{y}^{}{P(y|x)C(y,a)}$ (discrete)\\
+			$\Rightarrow a^* = \argmin_{a \in A} \int_{y}^{}{P(y|x)C(y,a)}dy$ (cont.)\\		
+		\end{compactdesc}
+		\subsection{Uncertainity Sampling}
+		\begin{compactdesc}
+			\item[Idea:] Classify most uncertain points first
+			\item[1:] Estimate $\hat{P}(y_i|x_i)$ given $D$
+			\item[2:] Pick most uncertain data point
+			\item[3:] Classify point and set $D \leftarrow D \cup {(x_i, y_i)}$
+			\item[4:] Restart at \textbf{1}
+		\end{compactdesc}
+		\section{Generative Modeling}
+		\begin{compactdesc}
+			\item[1:] Estimate prior $P(y)$
+			\item[2:] Estimate conditional $P(x|y)$
+			\item[3:] Then: $P(y|x) = \frac{1}{P(x)} P(y) P(x|y) $ and\\
+			$P(x,y) = P(x|y)P(x)$ with\\
+			$p(x) = \sum_y P(y)P(x|y)$\\
+			\item[Prediction:] $\hat{y} = \argmax_y P(y|x)$
+		\end{compactdesc}
+		\subsection{Naive Bayes Classifier}
+		\begin{compactdesc}
+			\item[Class label:] $P(Y=y) = p_y$ (categorical)\\
+			$\Rightarrow p_y = \frac{Count(Y=y)}{n}$
+			\item[Features:] $P(X_1, ... ,X_n|Y) = \prod_{i=1}^{d}P(X_i|Y)$ (independent)\\
+			$\Rightarrow$ Use MLE to estimate
+			\item[Gauss NBC:] $P(X_i|y) = \mathcal{N}(X_i | \mu_{y,i}, \sigma_{y,i}^2)$\\
+			$\mu_{y,i} = \frac{1}{Count(Y=y)} \sum_{j:y_j=y}x_{j,i}$\\
+			$\sigma_{y,i}^2=\frac{1}{Count(Y=y)} \sum_{j:y_j=y}^{}(x_{j,i} - \mu_{y,i})^2$
+		\end{compactdesc}
+		\subsection{Gaussian Bayes Classifier}
+		\begin{compactdesc}
+			\item[Class label:]  $P(Y=y) = p_y$ (categorical)\\
+			$\Rightarrow p_y = \frac{Count(Y=y)}{n}$
+			\item[Features:] $P(x|y) = \mathcal{N}(x, \mu_y, \Sigma_y)$ (multivariate)
+			\item[Estimates:] $\mu_y = \frac{1}{Count(Y=y)}\sum_{i:y_i=y}x_i$\\
+			$\Sigma_y = \frac{1}{Count(Y=y)} \sum_{i:y_i=y}((x_i - \mu_y)(x_i - \mu_y)^T$
+		\end{compactdesc}
+		\subsection{Outlier Detection}
+		If $P(x) < \mathcal{T} \hat{=}$ Threshold, throw away point.
+		\section{Mixture Models for Clustering}
+		\begin{compactdesc}
+			\item[Idea:] Model each cluster j as $P(x|\theta_j)$
+			\item[Assumption iid:] $P(D|\mathbf{\theta}) = \prod_{i=1}^{n}\sum_{j=1}^{k}{w_jP(x_i|\theta_j)}$\\
+			Minimization difficult! $\Rightarrow$ Soft/Hard EM
+		\end{compactdesc}
+		\subsection{Hard EM}
+		\begin{compactdesc}
+			\item[for t=1, ...]
+			\item[1:] $z_i^t = \argmax_z P(z|x_i, \theta^{t-1}) $\\
+			$ \Rightarrow z_i^t = \argmax_z P(z|\theta^{t-1})P(x_i|z,\theta^{t-1}) $
+			\item[2:] $\theta^t = \argmax_\theta P(D^t|\theta)$
+		\end{compactdesc}
+		
+		\subsection{Soft  EM}
+		\begin{compactdesc}
+			\item[for t=1, ...]
+			\item[E-Step:] $y_j^t(x) = P(Z=j | x, \Sigma, \mu, w)$\\
+			$\Rightarrow y_j^t(x) = \frac{w_jP(x|\Sigma_j, \mu_j)}{\sum_l w_lP(x|\Sigma_l, \mu_l)}$
+			\item[M-Step:] $\theta^t = \argmax_\theta Q(\theta;\theta^{t-1})$\\
+			$Q(\theta;\theta^{t-1}) = \E_{z_{1:n}}[\log P(x_{1:n}, z_{1:n}| \theta)|x_{1:n}, \theta^{t-1}]$\\
+			$\Rightarrow \theta^t = \argmax_\theta \sum_{i=1}^{n} \sum_{z_i=1}^{k} y_{z_i}(x_i) \log P(x_i, z_i | \theta)$
+			\item[M-Step Gaussian:] $w_j^t \leftarrow \frac{1}{n} \sum_{i=1}^{n}y_j^t(x_i)$\\
+			$\mu_j^t \leftarrow \frac{\sum_{i=1}^{n} y_j^t(x_i)*x_i}{\sum_{i=1}^{n}y_j^t(x_i)}$\\
+			$\Sigma_j^t \leftarrow \frac{\sum_{i=1}^{n}y_j^t(x_i)(x_i-\mu_j^t)(x_i-\mu_j^t)^T}{\sum_{i=1}^{n}y_j^t(x_i)}$
+		\end{compactdesc}
+		\section{Markov Chains / Markov Model}
+		\begin{compactdesc}
+			\item[Markov Assumption:] $\forall t: P(Y_t | Y_1, ..., Y_{t-1}) = P(Y_t|Y_{t-1})$
+			\item[Stationary Assumption:] $\forall t,y,y': P(Y_{t+1} = y | Y_t = y') = P(Y_t = y | Y_{t-1} = y')$
+			\item[Markov Chain:] $p^t = [p_1^t, p_2^t, ..., p_c^t]$\\
+			$T_{y',y} = P(Y_{t+1} = y | Y_t=y') = \theta_{y|y'}$\\
+			$\Rightarrow p^{t+1} = p^t*T$
+			\item[MLE Estimation:] $\hat{p_y} = \frac{Count(Y_1=y)}{m}$\\
+			$\hat{\theta}_{y|y'} = \frac{Count(Y_t = y, Y_{t-1} = y')}{Count(Y_{t-1} = y')}$
+			
+		\end{compactdesc}
+		
+		
+		
+		\raggedcolumns
+	\end{multicols*}
+\end{document}
